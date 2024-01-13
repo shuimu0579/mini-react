@@ -37,63 +37,137 @@
 // elementDom.appendChild(textDom);
 
 // v3
-function createTextNode(nodeValue) {
-  return {
-    type: "TEXT_ELEMENT",
-    props: {
-      nodeValue,
-      children: [],
-    },
-  };
-}
-function createElement(type, props, ...children) {
-  return {
-    type,
-    props: {
-      ...props,
-      children,
-    },
-  };
-}
+// function createTextNode(nodeValue) {
+//   return {
+//     type: "TEXT_ELEMENT",
+//     props: {
+//       nodeValue,
+//       children: [],
+//     },
+//   };
+// }
+// function createElement(type, props, ...children) {
+//   return {
+//     type,
+//     props: {
+//       ...props,
+//       children,
+//     },
+//   };
+// }
 
-const textEl = createTextNode("app");
-const App = createElement(
+// const textEl = createTextNode("app");
+// const App = createElement(
+//   "div",
+//   {
+//     id: "app",
+//   },
+//   textEl
+// );
+
+// const root = document.getElementById("root");
+
+// function render(vnode, container) {
+//   console.log("vnode", vnode);
+//   console.log("container", container);
+//   const dom =
+//     vnode.type !== "TEXT_ELEMENT"
+//       ? document.createElement(vnode.type)
+//       : document.createTextNode("");
+
+//   Object.keys(vnode.props).forEach((prop) => {
+//     if (prop !== "children") {
+//       dom[prop] = vnode.props[prop];
+//     }
+//   });
+//   container.append(dom);
+
+//   const children = vnode.props.children;
+//   children.forEach((child) => {
+//     render(child, dom);
+//   });
+// }
+
+// render(App, root);
+
+// v4
+// function createTextNode(nodeValue) {
+//   return {
+//     type: "TEXT_ELEMENT",
+//     props: {
+//       nodeValue,
+//       children: [],
+//     },
+//   };
+// }
+// function createElement(type, props, ...children) {
+//   return {
+//     type,
+//     props: {
+//       ...props,
+//       children: children.map((child) => {
+//         return typeof child === "string" ? createTextNode(child) : child;
+//       }),
+//     },
+//   };
+// }
+
+// const App = createElement(
+//   "div",
+//   {
+//     id: "app",
+//   },
+//   "app-",
+//   "mini-react"
+// );
+
+// const root = document.getElementById("root");
+
+// function render(vnode, container) {
+//   console.log("vnode", vnode);
+//   console.log("container", container);
+//   const dom =
+//     vnode.type !== "TEXT_ELEMENT"
+//       ? document.createElement(vnode.type)
+//       : document.createTextNode("");
+
+//   Object.keys(vnode.props).forEach((prop) => {
+//     if (prop !== "children") {
+//       dom[prop] = vnode.props[prop];
+//     }
+//   });
+//   container.append(dom);
+
+//   const children = vnode.props.children;
+//   children.forEach((child) => {
+//     render(child, dom);
+//   });
+// }
+
+// const ReactDom = {
+//   createRoot(container) {
+//     return {
+//       render(App) {
+//         render(App, container);
+//       },
+//     };
+//   },
+// };
+
+// ReactDom.createRoot(root).render(App);
+
+// v5
+import React from "./core/React.js";
+import ReactDom from "./core/ReactDom.js";
+
+const App = React.createElement(
   "div",
   {
     id: "app",
   },
-  textEl
+  "app-",
+  "mini-react"
 );
 
 const root = document.getElementById("root");
-
-// const elementDom = document.createElement(App.type);
-// elementDom.id = App.props["id"];
-// root.append(elementDom);
-
-// const textDom = document.createTextNode("");
-// textDom.nodeValue = textEl.props["nodeValue"];
-// elementDom.append(textDom);
-
-function render(vnode, container) {
-  console.log("vnode", vnode);
-  console.log("container", container);
-  const dom =
-    vnode.type !== "TEXT_ELEMENT"
-      ? document.createElement(vnode.type)
-      : document.createTextNode("");
-
-  Object.keys(vnode.props).forEach((prop) => {
-    if (prop !== "children") {
-      dom[prop] = vnode.props[prop];
-    }
-  });
-  container.append(dom);
-
-  const children = vnode.props.children;
-  children.forEach((child) => {
-    render(child, dom);
-  });
-}
-
-render(App, root);
+ReactDom.createRoot(root).render(App);
