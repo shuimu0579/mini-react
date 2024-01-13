@@ -157,17 +157,9 @@
 // ReactDom.createRoot(root).render(App);
 
 // v5
-import React from "./core/React.js";
-import ReactDom from "./core/ReactDom.js";
 
-const App = React.createElement(
-  "div",
-  {
-    id: "app",
-  },
-  "app-",
-  "mini-react"
-);
+import ReactDom from "./core/ReactDom.js";
+import App from "./App.js";
 
 const root = document.getElementById("root");
 ReactDom.createRoot(root).render(App);
