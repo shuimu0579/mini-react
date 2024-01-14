@@ -72,12 +72,21 @@ function performWorkOfUnit(work) {
   const children = work.props.children;
   let prevChild = null;
   children.forEach((child, index) => {
+    const newWork = {
+      type: child.type,
+      props: child.props,
+      child: null,
+      parent: work,
+      sibling: null,
+      dom: null,
+    };
+
     if (index === 0) {
-      work.child = child;
+      work.child = newWork;
     } else {
-      prevChild.sibling = child;
+      prevChild.sibling = newWork;
     }
-    prevChild = child;
+    prevChild = newWork;
   });
   // 4.返回下一个要执行的任务
   console.log(work);
