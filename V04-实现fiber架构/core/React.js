@@ -89,7 +89,14 @@ function performWorkOfUnit(work) {
     prevChild = newWork;
   });
   // 4.返回下一个要执行的任务
-  console.log(work);
+  // 转变成链表的总体规则如下：优先找 child孩子节点，没有孩子节点就找 sibling兄弟节点，没有孩子节点和兄弟节点，就找uncle叔叔节点。
+  if (work.child) {
+    return work.child;
+  }
+  if (work.sibling) {
+    return work.sibling;
+  }
+  return work.parent?.sibling;
 }
 
 requestIdleCallback(workLoop);
