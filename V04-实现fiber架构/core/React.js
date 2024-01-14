@@ -20,24 +20,29 @@ function createElement(type, props, ...children) {
   };
 }
 
-function render(vnode, container) {
-  nextWorkOfUnit = {};
+function render(el, container) {
+  nextWorkOfUnit = {
+    dom: container,
+    props: {
+      children: [el],
+    },
+  };
 
-  // console.log("vnode", vnode);
+  // console.log("el", el);
   // console.log("container", container);
   // const dom =
-  //   vnode.type !== "TEXT_ELEMENT"
-  //     ? document.createElement(vnode.type)
+  //   el.type !== "TEXT_ELEMENT"
+  //     ? document.createElement(el.type)
   //     : document.createTextNode("");
 
-  // Object.keys(vnode.props).forEach((prop) => {
+  // Object.keys(el.props).forEach((prop) => {
   //   if (prop !== "children") {
-  //     dom[prop] = vnode.props[prop];
+  //     dom[prop] = el.props[prop];
   //   }
   // });
   // container.append(dom);
 
-  // const children = vnode.props.children;
+  // const children = el.props.children;
   // children.forEach((child) => {
   //   render(child, dom);
   // });
@@ -57,17 +62,24 @@ function workLoop(IdleDeadline) {
 }
 
 function performWorkOfUnit(work) {
-  // 1.创建 dom
-  const dom = (work.dom =
-    vnode.type !== "TEXT_ELEMENT"
-      ? document.createElement(vnode.type)
-      : document.createTextNode(""));
-  // 2.处理 props
-  Object.keys(vnode.props).forEach((prop) => {
-    if (prop !== "children") {
-      dom[prop] = vnode.props[prop];
-    }
-  });
+  if (!work.dom) {
+    // 1.创建 dom
+    const dom = (work.dom =
+      work.type !== "TEXT_ELEMENT"
+        ? document.createElement(work.type)
+        : document.createTextNode(""));
+
+    // 将生成的真实dom，添加到父级容器里面
+    work.parent.dom.append(dom);
+
+    // 2.处理 props
+    Object.keys(work.props).forEach((prop) => {
+      if (prop !== "children") {
+        dom[prop] = work.props[prop];
+      }
+    });
+  }
+
   // 3.转换链表 设置好指针
   const children = work.props.children;
   let prevChild = null;
