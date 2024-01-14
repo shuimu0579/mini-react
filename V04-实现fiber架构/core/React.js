@@ -27,88 +27,82 @@ function render(el, container) {
       children: [el],
     },
   };
-
-  // console.log("el", el);
-  // console.log("container", container);
-  // const dom =
-  //   el.type !== "TEXT_ELEMENT"
-  //     ? document.createElement(el.type)
-  //     : document.createTextNode("");
-
-  // Object.keys(el.props).forEach((prop) => {
-  //   if (prop !== "children") {
-  //     dom[prop] = el.props[prop];
-  //   }
-  // });
-  // container.append(dom);
-
-  // const children = el.props.children;
-  // children.forEach((child) => {
-  //   render(child, dom);
-  // });
 }
 
 let nextWorkOfUnit = null;
-function workLoop(IdleDeadline) {
+function workLoop(deadline) {
   let shouldYield = false;
 
-  while (!shouldYield) {
+  while (!shouldYield && nextWorkOfUnit) {
     nextWorkOfUnit = performWorkOfUnit(nextWorkOfUnit);
 
-    shouldYield = IdleDeadline.timeRemaining() < 1;
+    shouldYield = deadline.timeRemaining() < 1;
   }
 
   requestIdleCallback(workLoop);
 }
 
-function performWorkOfUnit(work) {
-  if (!work.dom) {
-    // 1.创建 dom
-    const dom = (work.dom =
-      work.type !== "TEXT_ELEMENT"
-        ? document.createElement(work.type)
-        : document.createTextNode(""));
+function createDom(type) {
+  return type !== "TEXT_ELEMENT"
+    ? document.createElement(type)
+    : document.createTextNode("");
+}
 
-    // 将生成的真实dom，添加到父级容器里面
-    work.parent.dom.append(dom);
+function updateProps(dom, props) {
+  Object.keys(props).forEach((prop) => {
+    if (prop !== "children") {
+      dom[prop] = props[prop];
+    }
+  });
+}
 
-    // 2.处理 props
-    Object.keys(work.props).forEach((prop) => {
-      if (prop !== "children") {
-        dom[prop] = work.props[prop];
-      }
-    });
-  }
-
-  // 3.转换链表 设置好指针
-  const children = work.props.children;
+function initChildren(fiber) {
+  const children = fiber.props.children;
   let prevChild = null;
   children.forEach((child, index) => {
-    const newWork = {
+    const newFiber = {
       type: child.type,
       props: child.props,
       child: null,
-      parent: work,
+      parent: fiber,
       sibling: null,
       dom: null,
     };
 
     if (index === 0) {
-      work.child = newWork;
+      fiber.child = newFiber;
     } else {
-      prevChild.sibling = newWork;
+      prevChild.sibling = newFiber;
     }
-    prevChild = newWork;
+    prevChild = newFiber;
   });
+}
+
+// 一边建立树到链表的关系，一边生成真实的 dom,
+// 而不是先一次性将树生成为链表，再将链表生成真实的 dom
+function performWorkOfUnit(fiber) {
+  if (!fiber.dom) {
+    // 1.创建 dom
+    const dom = (fiber.dom = createDom(fiber.type));
+    // 将生成的真实dom，添加到父级容器里面
+    fiber.parent.dom.append(dom);
+
+    // 2.处理 props
+    updateProps(dom, fiber.props);
+  }
+
+  // 3.转换链表 设置好指针
+  initChildren(fiber);
+
   // 4.返回下一个要执行的任务
   // 转变成链表的总体规则如下：优先找 child孩子节点，没有孩子节点就找 sibling兄弟节点，没有孩子节点和兄弟节点，就找uncle叔叔节点。
-  if (work.child) {
-    return work.child;
+  if (fiber.child) {
+    return fiber.child;
   }
-  if (work.sibling) {
-    return work.sibling;
+  if (fiber.sibling) {
+    return fiber.sibling;
   }
-  return work.parent?.sibling;
+  return fiber.parent?.sibling;
 }
 
 requestIdleCallback(workLoop);
