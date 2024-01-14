@@ -21,25 +21,69 @@ function createElement(type, props, ...children) {
 }
 
 function render(vnode, container) {
-  console.log("vnode", vnode);
-  console.log("container", container);
-  const dom =
+  nextWorkOfUnit = {};
+
+  // console.log("vnode", vnode);
+  // console.log("container", container);
+  // const dom =
+  //   vnode.type !== "TEXT_ELEMENT"
+  //     ? document.createElement(vnode.type)
+  //     : document.createTextNode("");
+
+  // Object.keys(vnode.props).forEach((prop) => {
+  //   if (prop !== "children") {
+  //     dom[prop] = vnode.props[prop];
+  //   }
+  // });
+  // container.append(dom);
+
+  // const children = vnode.props.children;
+  // children.forEach((child) => {
+  //   render(child, dom);
+  // });
+}
+
+let nextWorkOfUnit = null;
+function workLoop(IdleDeadline) {
+  let shouldYield = false;
+
+  while (!shouldYield) {
+    nextWorkOfUnit = performWorkOfUnit(nextWorkOfUnit);
+
+    shouldYield = IdleDeadline.timeRemaining() < 1;
+  }
+
+  requestIdleCallback(workLoop);
+}
+
+function performWorkOfUnit(work) {
+  // 1.创建 dom
+  const dom = (work.dom =
     vnode.type !== "TEXT_ELEMENT"
       ? document.createElement(vnode.type)
-      : document.createTextNode("");
-
+      : document.createTextNode(""));
+  // 2.处理 props
   Object.keys(vnode.props).forEach((prop) => {
     if (prop !== "children") {
       dom[prop] = vnode.props[prop];
     }
   });
-  container.append(dom);
-
-  const children = vnode.props.children;
-  children.forEach((child) => {
-    render(child, dom);
+  // 3.转换链表 设置好指针
+  const children = work.props.children;
+  let prevChild = null;
+  children.forEach((child, index) => {
+    if (index === 0) {
+      work.child = child;
+    } else {
+      prevChild.sibling = child;
+    }
+    prevChild = child;
   });
+  // 4.返回下一个要执行的任务
+  console.log(work);
 }
+
+requestIdleCallback(workLoop);
 
 const React = {
   createTextNode,
