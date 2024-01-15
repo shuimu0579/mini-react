@@ -27,8 +27,10 @@ function render(el, container) {
       children: [el],
     },
   };
+  root = nextWorkOfUnit;
 }
 
+let root = null;
 let nextWorkOfUnit = null;
 function workLoop(deadline) {
   let shouldYield = false;
@@ -39,7 +41,24 @@ function workLoop(deadline) {
     shouldYield = deadline.timeRemaining() < 1;
   }
 
+  // 链表中的节点遍历处理完毕,统一提交
+  if (!nextWorkOfUnit && root) {
+    commitRoot();
+  }
+
   requestIdleCallback(workLoop);
+}
+
+function commitRoot() {
+  commitWork(root.child);
+  root = null;
+}
+
+function commitWork(fiber) {
+  if (!fiber) return;
+  fiber.parent.dom.append(fiber.dom);
+  commitWork(fiber.child);
+  commitWork(fiber.sibling);
 }
 
 function createDom(type) {
@@ -84,8 +103,9 @@ function performWorkOfUnit(fiber) {
   if (!fiber.dom) {
     // 1.创建 dom
     const dom = (fiber.dom = createDom(fiber.type));
-    // 将生成的真实dom，添加到父级容器里面
-    fiber.parent.dom.append(dom);
+    // 注释掉 将生成的真实dom，添加到父级容器里面
+    // 改为 commitRoot 统一提交
+    // fiber.parent.dom.append(dom);
 
     // 2.处理 props
     updateProps(dom, fiber.props);
