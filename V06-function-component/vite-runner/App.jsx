@@ -1,24 +1,23 @@
 import React from "./core/React.js";
-const App = <div id="app">app-mini-react</div>;
-// function App
-// function App() {
-//   return <div id="app">app-mini-react</div>;
-// }
+
+function Counter() {
+  return <div>count</div>;
+}
+
+function CounterContainer() {
+  return <Counter></Counter>;
+}
+
+function App() {
+  return (
+    <div id="app">
+      app-mini-react
+      {/* <Counter></Counter> */}
+      <CounterContainer></CounterContainer>
+    </div>
+  );
+}
+
 console.log("App", App);
-// {
-//   type: "div",
-//   props: {
-//     id: "app",
-//     children: [
-//       {
-//         type: "TEXT_ELEMENT",
-//         props: {
-//           nodeValue: "app-mini-react",
-//           children: [],
-//         },
-//       },
-//     ],
-//   },
-// };
 
 export default App;

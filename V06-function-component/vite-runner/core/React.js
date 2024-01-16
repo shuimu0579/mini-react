@@ -56,7 +56,14 @@ function commitRoot() {
 
 function commitWork(fiber) {
   if (!fiber) return;
-  fiber.parent.dom.append(fiber.dom);
+
+  let fiberParent = fiber.parent;
+  while (!fiberParent.dom) {
+    fiberParent = fiberParent.parent;
+  }
+  if (fiber.dom) {
+    fiberParent.dom.append(fiber.dom);
+  }
   commitWork(fiber.child);
   commitWork(fiber.sibling);
 }
@@ -75,8 +82,7 @@ function updateProps(dom, props) {
   });
 }
 
-function initChildren(fiber) {
-  const children = fiber.props.children;
+function initChildren(fiber, children) {
   let prevChild = null;
   children.forEach((child, index) => {
     const newFiber = {
@@ -100,19 +106,25 @@ function initChildren(fiber) {
 // 一边建立树到链表的关系，一边生成真实的 dom,
 // 而不是先一次性将树生成为链表，再将链表生成真实的 dom
 function performWorkOfUnit(fiber) {
-  if (!fiber.dom) {
-    // 1.创建 dom
-    const dom = (fiber.dom = createDom(fiber.type));
-    // 注释掉 将生成的真实dom，添加到父级容器里面
-    // 改为 commitRoot 统一提交
-    // fiber.parent.dom.append(dom);
+  const isFunctionComponent = typeof fiber.type === "function";
 
-    // 2.处理 props
-    updateProps(dom, fiber.props);
+  // 不是函数式组件的时候，才需要创建真实 dom
+  if (!isFunctionComponent) {
+    if (!fiber.dom) {
+      // 1.创建 dom
+      const dom = (fiber.dom = createDom(fiber.type));
+      // 注释掉 将生成的真实dom，添加到父级容器里面
+      // 改为 commitRoot 统一提交
+      // fiber.parent.dom.append(dom);
+
+      // 2.处理 props
+      updateProps(dom, fiber.props);
+    }
   }
 
   // 3.转换链表 设置好指针
-  initChildren(fiber);
+  const children = isFunctionComponent ? [fiber.type()] : fiber.props.children;
+  initChildren(fiber, children);
 
   // 4.返回下一个要执行的任务
   // 转变成链表的总体规则如下：优先找 child孩子节点，没有孩子节点就找 sibling兄弟节点，没有孩子节点和兄弟节点，就找uncle叔叔节点。
