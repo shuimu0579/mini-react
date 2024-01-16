@@ -14,7 +14,10 @@ function createElement(type, props, ...children) {
     props: {
       ...props,
       children: children.map((child) => {
-        return typeof child === "string" ? createTextNode(child) : child;
+        console.log("child", child);
+        const isTextNode =
+          typeof child === "string" || typeof child === "number";
+        return isTextNode ? createTextNode(child) : child;
       }),
     },
   };
@@ -123,7 +126,9 @@ function performWorkOfUnit(fiber) {
   }
 
   // 3.转换链表 设置好指针
-  const children = isFunctionComponent ? [fiber.type()] : fiber.props.children;
+  const children = isFunctionComponent
+    ? [fiber.type(fiber.props)]
+    : fiber.props.children;
   initChildren(fiber, children);
 
   // 4.返回下一个要执行的任务
@@ -131,10 +136,13 @@ function performWorkOfUnit(fiber) {
   if (fiber.child) {
     return fiber.child;
   }
-  if (fiber.sibling) {
-    return fiber.sibling;
+
+  // 找到非函数组件的兄弟节点，找到函数组件的兄弟节点
+  let nextFiber = fiber;
+  while (nextFiber) {
+    if (nextFiber.sibling) return nextFiber.sibling;
+    nextFiber = nextFiber.parent;
   }
-  return fiber.parent?.sibling;
 }
 
 requestIdleCallback(workLoop);

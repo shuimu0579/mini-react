@@ -1,7 +1,7 @@
 import React from "./core/React.js";
 
-function Counter() {
-  return <div>count</div>;
+function Counter({ num }) {
+  return <div>count: {num}</div>;
 }
 
 function CounterContainer() {
@@ -12,8 +12,9 @@ function App() {
   return (
     <div id="app">
       app-mini-react
-      {/* <Counter></Counter> */}
-      <CounterContainer></CounterContainer>
+      <Counter num={10}></Counter>
+      <Counter num={20}></Counter>
+      {/* <CounterContainer></CounterContainer> */}
     </div>
   );
 }
