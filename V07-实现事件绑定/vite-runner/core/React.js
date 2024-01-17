@@ -34,6 +34,7 @@ function render(el, container) {
 }
 
 let root = null;
+let currentRoot = null;
 let nextWorkOfUnit = null;
 function workLoop(deadline) {
   let shouldYield = false;
@@ -54,6 +55,7 @@ function workLoop(deadline) {
 
 function commitRoot() {
   commitWork(root.child);
+  currentRoot = root;
   root = null;
 }
 
@@ -161,6 +163,14 @@ function performWorkOfUnit(fiber) {
 }
 
 requestIdleCallback(workLoop);
+
+function update() {
+  nextWorkOfUnit = {
+    dom: currentRoot.dom,
+    props: currentRoot.props,
+  };
+  root = nextWorkOfUnit;
+}
 
 const React = {
   createTextNode,
