@@ -80,12 +80,18 @@ function createDom(type) {
 function updateProps(dom, props) {
   Object.keys(props).forEach((prop) => {
     if (prop !== "children") {
-      dom[prop] = props[prop];
+      if (prop.startsWith("on")) {
+        const eventType = prop.slice(2).toLowerCase();
+        dom.addEventListener(eventType, props[prop]);
+      } else {
+        dom[prop] = props[prop];
+      }
     }
   });
 }
 
 function initChildren(fiber, children) {
+  console.log("fiber", fiber);
   let prevChild = null;
   children.forEach((child, index) => {
     const newFiber = {
