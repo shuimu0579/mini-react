@@ -161,7 +161,7 @@ function initChildren(fiber, children) {
       };
     }
 
-    // 这句该怎么理解？
+    // 当children里面有几个子项的时候，当前oldFiber是需要更新的，需要指向oldFiber.sibling
     if (oldFiber) {
       oldFiber = oldFiber.sibling;
     }
