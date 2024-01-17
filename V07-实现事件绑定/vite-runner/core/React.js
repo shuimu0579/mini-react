@@ -94,7 +94,9 @@ function updateProps(dom, props) {
 
 function initChildren(fiber, children) {
   console.log("fiber", fiber);
-  let prevChild = null;
+  let oldFiber = fiber.alternate?.child;
+  console.log("oldFiber", oldFiber);
+
   children.forEach((child, index) => {
     const newFiber = {
       type: child.type,
@@ -168,6 +170,7 @@ function update() {
   nextWorkOfUnit = {
     dom: currentRoot.dom,
     props: currentRoot.props,
+    alternate: currentRoot, // 新链表节点到老链表节点的alternate指针
   };
   root = nextWorkOfUnit;
 }
