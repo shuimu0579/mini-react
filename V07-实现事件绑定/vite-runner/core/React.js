@@ -66,9 +66,14 @@ function commitWork(fiber) {
   while (!fiberParent.dom) {
     fiberParent = fiberParent.parent;
   }
-  if (fiber.dom) {
-    fiberParent.dom.append(fiber.dom);
+  if (fiber.effectTag === "update") {
+    updateProps(fiber.dom, fiber.props, fiber.alternate?.props);
+  } else if (fiber.effectTag === "placement") {
+    if (fiber.dom) {
+      fiberParent.dom.append(fiber.dom);
+    }
   }
+
   commitWork(fiber.child);
   commitWork(fiber.sibling);
 }
@@ -79,33 +84,87 @@ function createDom(type) {
     : document.createTextNode("");
 }
 
-function updateProps(dom, props) {
-  Object.keys(props).forEach((prop) => {
-    if (prop !== "children") {
-      if (prop.startsWith("on")) {
-        const eventType = prop.slice(2).toLowerCase();
-        dom.addEventListener(eventType, props[prop]);
-      } else {
-        dom[prop] = props[prop];
+function updateProps(dom, nextProps, prevProps) {
+  // Object.keys(nextProps).forEach((prop) => {
+  //   if (prop !== "children") {
+  //     if (prop.startsWith("on")) {
+  //       const eventType = prop.slice(2).toLowerCase();
+  //       dom.addEventListener(eventType, nextProps[prop]);
+  //     } else {
+  //       dom[prop] = nextProps[prop];
+  //     }
+  //   }
+  // });
+
+  // {id: "1"} {}
+  // 1、old 有 new 没有 删除
+  Object.keys(prevProps).forEach((key) => {
+    if (key !== "children") {
+      if (!(key in nextProps)) {
+        dom.removeAttribute(key);
+      }
+    }
+  });
+  // 2、new 有 old没有 添加
+  // 3、new 有 old有 修改
+  Object.keys(nextProps).forEach((key) => {
+    if (key !== "children") {
+      if (nextProps[key] !== prevProps[key]) {
+        if (key.startsWith("on")) {
+          const eventType = key.slice(2).toLowerCase();
+
+          dom.removeEventListener(eventType, prevProps[key]);
+          dom.addEventListener(eventType, nextProps[key]);
+        } else {
+          console.log("nextProps", nextProps);
+          dom[key] = nextProps[key];
+        }
       }
     }
   });
 }
 
 function initChildren(fiber, children) {
+  let prevChild = null;
   console.log("fiber", fiber);
   let oldFiber = fiber.alternate?.child;
   console.log("oldFiber", oldFiber);
 
   children.forEach((child, index) => {
-    const newFiber = {
-      type: child.type,
-      props: child.props,
-      child: null,
-      parent: fiber,
-      sibling: null,
-      dom: null,
-    };
+    const isSameType = oldFiber && oldFiber.type === child.type;
+
+    let newFiber;
+    if (isSameType) {
+      // update
+      newFiber = {
+        type: child.type,
+        props: child.props,
+        child: null,
+        parent: fiber,
+        sibling: null,
+
+        dom: oldFiber.dom,
+        effectTag: "update",
+        alternate: oldFiber, // 新链表节点到老链表节点的alternate指针
+      };
+    } else {
+      // create
+      newFiber = {
+        type: child.type,
+        props: child.props,
+        child: null,
+        parent: fiber,
+        sibling: null,
+
+        dom: null,
+        effectTag: "placement",
+      };
+    }
+
+    // 这句该怎么理解？
+    if (oldFiber) {
+      oldFiber = oldFiber.sibling;
+    }
 
     if (index === 0) {
       fiber.child = newFiber;
@@ -131,7 +190,7 @@ function updateHostComponent(fiber) {
     // fiber.parent.dom.append(dom);
 
     // 2.处理 props
-    updateProps(dom, fiber.props);
+    updateProps(dom, fiber.props, {});
   }
 
   // 3.转换链表 设置好指针
@@ -176,6 +235,7 @@ function update() {
 }
 
 const React = {
+  update,
   createTextNode,
   createElement,
   render,
