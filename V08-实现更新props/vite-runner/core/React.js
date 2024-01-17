@@ -24,16 +24,16 @@ function createElement(type, props, ...children) {
 }
 
 function render(el, container) {
-  nextWorkOfUnit = {
+  wipRoot = {
     dom: container,
     props: {
       children: [el],
     },
   };
-  root = nextWorkOfUnit;
+  nextWorkOfUnit = wipRoot;
 }
 
-let root = null;
+let wipRoot = null;
 let currentRoot = null;
 let nextWorkOfUnit = null;
 function workLoop(deadline) {
@@ -46,7 +46,7 @@ function workLoop(deadline) {
   }
 
   // 链表中的节点遍历处理完毕,统一提交
-  if (!nextWorkOfUnit && root) {
+  if (!nextWorkOfUnit && wipRoot) {
     commitRoot();
   }
 
@@ -54,9 +54,9 @@ function workLoop(deadline) {
 }
 
 function commitRoot() {
-  commitWork(root.child);
-  currentRoot = root;
-  root = null;
+  commitWork(wipRoot.child);
+  currentRoot = wipRoot;
+  wipRoot = null;
 }
 
 function commitWork(fiber) {
@@ -124,7 +124,7 @@ function updateProps(dom, nextProps, prevProps) {
   });
 }
 
-function initChildren(fiber, children) {
+function reconcileChildren(fiber, children) {
   let prevChild = null;
   console.log("fiber", fiber);
   let oldFiber = fiber.alternate?.child;
@@ -178,7 +178,7 @@ function initChildren(fiber, children) {
 function updateFunctionComponent(fiber) {
   // 转换链表 设置好指针
   const children = [fiber.type(fiber.props)];
-  initChildren(fiber, children);
+  reconcileChildren(fiber, children);
 }
 
 function updateHostComponent(fiber) {
@@ -195,7 +195,7 @@ function updateHostComponent(fiber) {
 
   // 3.转换链表 设置好指针
   const children = fiber.props.children;
-  initChildren(fiber, children);
+  reconcileChildren(fiber, children);
 }
 
 // 一边建立树到链表的关系，一边生成真实的 dom,
@@ -226,12 +226,12 @@ function performWorkOfUnit(fiber) {
 requestIdleCallback(workLoop);
 
 function update() {
-  nextWorkOfUnit = {
+  wipRoot = {
     dom: currentRoot.dom,
     props: currentRoot.props,
     alternate: currentRoot, // 新链表节点到老链表节点的alternate指针
   };
-  root = nextWorkOfUnit;
+  nextWorkOfUnit = wipRoot;
 }
 
 const React = {
