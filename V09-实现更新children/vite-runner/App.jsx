@@ -1,39 +1,34 @@
 import React from "./core/React.js";
 
-let count = 10;
-let props = { id: "1111111111" };
-function Counter({ num }) {
+let showBar = false;
+function Counter() {
+  // const foo = <div>foo</div>;
+  function Foo() {
+    return <div>foo</div>;
+  }
+  const bar = <p>bar</p>;
+
   function handleClick() {
-    console.log("click");
-    // props 更新
-    count++;
-    // props 删除
-    props = {};
+    showBar = !showBar;
     React.update();
   }
+
   return (
-    <div {...props}>
-      count: {count}
+    <div>
+      Counter
+      {/* <div>{showBar ? bar : foo}</div> */}
+      <div>{showBar ? bar : <Foo></Foo>}</div>
       <button onClick={handleClick}>click</button>
     </div>
   );
 }
-
-function CounterContainer() {
-  return <Counter></Counter>;
-}
-
 function App() {
   return (
     <div id="app">
       app-mini-react
-      <Counter num={10}></Counter>
-      <Counter num={20}></Counter>
-      <CounterContainer></CounterContainer>
+      <Counter></Counter>
     </div>
   );
 }
-
-console.log("App", App);
 
 export default App;

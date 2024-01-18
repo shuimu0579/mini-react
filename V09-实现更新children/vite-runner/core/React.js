@@ -36,6 +36,7 @@ function render(el, container) {
 let wipRoot = null;
 let currentRoot = null;
 let nextWorkOfUnit = null;
+let deletions = [];
 function workLoop(deadline) {
   let shouldYield = false;
 
@@ -54,9 +55,23 @@ function workLoop(deadline) {
 }
 
 function commitRoot() {
+  deletions.forEach(commitDeletion);
   commitWork(wipRoot.child);
   currentRoot = wipRoot;
   wipRoot = null;
+  deletions = [];
+}
+
+function commitDeletion(fiber) {
+  if (fiber.dom) {
+    let fiberParent = fiber.parent;
+    while (!fiberParent.dom) {
+      fiberParent = fiberParent.parent;
+    }
+    fiberParent.dom.removeChild(fiber.dom);
+  } else {
+    commitDeletion(fiber.child);
+  }
 }
 
 function commitWork(fiber) {
@@ -159,6 +174,11 @@ function reconcileChildren(fiber, children) {
         dom: null,
         effectTag: "placement",
       };
+
+      if (oldFiber) {
+        console.log("oldFiber", oldFiber);
+        deletions.push(oldFiber);
+      }
     }
 
     // 当children里面有几个子项的时候，当前oldFiber是需要更新的，需要指向oldFiber.sibling
