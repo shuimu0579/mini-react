@@ -163,17 +163,19 @@ function reconcileChildren(fiber, children) {
         alternate: oldFiber, // 新链表节点到老链表节点的alternate指针
       };
     } else {
-      // create
-      newFiber = {
-        type: child.type,
-        props: child.props,
-        child: null,
-        parent: fiber,
-        sibling: null,
+      if (child) {
+        // create
+        newFiber = {
+          type: child.type,
+          props: child.props,
+          child: null,
+          parent: fiber,
+          sibling: null,
 
-        dom: null,
-        effectTag: "placement",
-      };
+          dom: null,
+          effectTag: "placement",
+        };
+      }
 
       if (oldFiber) {
         console.log("oldFiber", oldFiber);
@@ -191,7 +193,10 @@ function reconcileChildren(fiber, children) {
     } else {
       prevChild.sibling = newFiber;
     }
-    prevChild = newFiber;
+
+    if (newFiber) {
+      prevChild = newFiber;
+    }
   });
 
   console.log(oldFiber);

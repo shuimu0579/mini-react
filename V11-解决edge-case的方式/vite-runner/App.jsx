@@ -2,13 +2,6 @@ import React from "./core/React.js";
 
 let showBar = false;
 function Counter() {
-  const foo = (
-    <div>
-      foo
-      <div>child1</div>
-      <div>child2</div>
-    </div>
-  );
   const bar = <div>bar</div>;
 
   function handleShowBar() {
@@ -20,7 +13,7 @@ function Counter() {
     <div>
       Counter
       <button onClick={handleShowBar}>showBar</button>
-      <div>{showBar ? bar : foo}</div>
+      {showBar && bar}
     </div>
   );
 }
