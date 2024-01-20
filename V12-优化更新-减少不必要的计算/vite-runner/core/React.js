@@ -37,6 +37,7 @@ let wipRoot = null;
 let currentRoot = null;
 let nextWorkOfUnit = null;
 let deletions = [];
+let wipFiber = null;
 function workLoop(deadline) {
   let shouldYield = false;
 
@@ -207,6 +208,8 @@ function reconcileChildren(fiber, children) {
 }
 
 function updateFunctionComponent(fiber) {
+  wipFiber = fiber;
+
   // 转换链表 设置好指针
   const children = [fiber.type(fiber.props)];
   reconcileChildren(fiber, children);
@@ -257,12 +260,26 @@ function performWorkOfUnit(fiber) {
 requestIdleCallback(workLoop);
 
 function update() {
-  wipRoot = {
-    dom: currentRoot.dom,
-    props: currentRoot.props,
-    alternate: currentRoot, // 新链表节点到老链表节点的alternate指针
+  console.log(wipFiber);
+  let currentFiber = wipFiber;
+
+  // `update`函数里面返回 `() => {console.log(currentFiber);}`函数
+  // 使得 currentFiber 得到的就是 当前点击的要更新的组件
+  return () => {
+    console.log(currentFiber);
+
+    wipRoot = {
+      ...currentFiber,
+      alternate: currentFiber,
+    };
+    // wipRoot = {
+    //   dom: currentRoot.dom,
+    //   props: currentRoot.props,
+    //   alternate: currentRoot, // 新链表节点到老链表节点的alternate指针
+    // };
+
+    nextWorkOfUnit = wipRoot;
   };
-  nextWorkOfUnit = wipRoot;
 }
 
 const React = {
