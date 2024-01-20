@@ -43,6 +43,13 @@ function workLoop(deadline) {
 
   while (!shouldYield && nextWorkOfUnit) {
     nextWorkOfUnit = performWorkOfUnit(nextWorkOfUnit);
+    console.log("wipRoot", wipRoot);
+    console.log("nextWorkOfUnit", nextWorkOfUnit);
+    // 找到需要更新的子树的结束：遍历完整颗子树 -》当处理兄弟节点的时候
+    if (wipRoot?.sibling?.type === nextWorkOfUnit?.type) {
+      console.log("hit", wipRoot, nextWorkOfUnit);
+      nextWorkOfUnit = undefined;
+    }
 
     shouldYield = deadline.timeRemaining() < 1;
   }
