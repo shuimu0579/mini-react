@@ -35,3 +35,6 @@
 这种方式能有效的避免`Tutorial Hell(教程地狱)`，就是买了很多课，却不去花费大量的时间去学习、练习、应用、创造，除了给自己虚幻的自我满足，没有真正的用处。
 
 PS: github 代码仓库链接：https://github.com/shuimu0579/mini-react
+
+![mini-react学习路径](./assets/mini-react学习路径.png)
+<https://excalidraw.com/>
