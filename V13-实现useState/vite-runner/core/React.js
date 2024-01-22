@@ -313,7 +313,7 @@ function useState(initial) {
   currentFiber.stateHooks = stateHooks;
 
   function setState(action) {
-    stateHook.queue.push(action);
+    stateHook.queue.push(typeof action === "function" ? action : () => action);
 
     wipRoot = {
       ...currentFiber,
