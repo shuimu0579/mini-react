@@ -289,11 +289,35 @@ function update() {
   };
 }
 
+function useState(initial) {
+  let currentFiber = wipFiber;
+  const oldHook = currentFiber.alternate?.stateHook;
+
+  const stateHook = {
+    state: oldHook ? oldHook.state : initial,
+  };
+
+  currentFiber.stateHook = stateHook;
+
+  function setState(action) {
+    stateHook.state = action(stateHook.state);
+    wipRoot = {
+      ...currentFiber,
+      alternate: currentFiber,
+    };
+
+    nextWorkOfUnit = wipRoot;
+  }
+
+  return [stateHook.state, setState];
+}
+
 const React = {
   update,
   createTextNode,
   createElement,
   render,
+  useState,
 };
 
 export default React;
