@@ -22,7 +22,7 @@ function Foo() {
     console.log(
       "useEffect调用时机是在 React 完成对 DOM 的渲染之后，并且浏览器完成绘制之前"
     );
-  }, []);
+  }, [count]);
 
   return (
     <div>

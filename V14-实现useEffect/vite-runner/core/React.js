@@ -74,7 +74,24 @@ function commitRoot() {
 function commitEffectHook() {
   function run(fiber) {
     if (!fiber) return;
-    fiber.effectHook?.callback();
+
+    if (!fiber.alternate) {
+      // init 初始化时
+      fiber.effectHook?.callback();
+    } else {
+      // update 更新时
+      // deps 有没有发生改变
+      const oldEffectHook = fiber.alternate?.effectHook;
+      console.log("oldEffectHook", oldEffectHook);
+
+      // some
+      const needUpdate = oldEffectHook?.deps.some((oldDep, index) => {
+        return oldDep !== fiber.effectHook.deps[index];
+      });
+      console.log("needUpdate", needUpdate);
+      needUpdate && fiber.effectHook?.callback();
+    }
+
     run(fiber.child);
     run(fiber.sibling);
   }
