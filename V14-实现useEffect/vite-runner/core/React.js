@@ -65,9 +65,21 @@ function workLoop(deadline) {
 function commitRoot() {
   deletions.forEach(commitDeletion);
   commitWork(wipRoot.child);
+  commitEffectHook();
   currentRoot = wipRoot;
   wipRoot = null;
   deletions = [];
+}
+
+function commitEffectHook() {
+  function run(fiber) {
+    if (!fiber) return;
+    fiber.effectHook?.callback();
+    run(fiber.child);
+    run(fiber.sibling);
+  }
+
+  run(wipRoot);
 }
 
 function commitDeletion(fiber) {
@@ -331,12 +343,22 @@ function useState(initial) {
   return [stateHook.state, setState];
 }
 
+function useEffect(callback, deps) {
+  const effectHook = {
+    callback,
+    deps,
+  };
+
+  wipFiber.effectHook = effectHook;
+}
+
 const React = {
   update,
   createTextNode,
   createElement,
   render,
   useState,
+  useEffect,
 };
 
 export default React;
