@@ -84,15 +84,17 @@ function commitEffectHooks() {
       // update 更新时
       // deps 有没有发生改变
       fiber.effectHooks?.forEach((newHook, index) => {
-        const oldEffectHook = fiber.alternate?.effectHooks[index];
-        console.log("oldEffectHook", oldEffectHook);
+        if (newHook.deps.length > 0) {
+          const oldEffectHook = fiber.alternate?.effectHooks[index];
+          console.log("oldEffectHook", oldEffectHook);
 
-        // some
-        const needUpdate = oldEffectHook?.deps.some((oldDep, i) => {
-          return oldDep !== newHook.deps[i];
-        });
-        console.log("needUpdate", needUpdate);
-        needUpdate && newHook?.callback();
+          // some
+          const needUpdate = oldEffectHook?.deps.some((oldDep, i) => {
+            return oldDep !== newHook.deps[i];
+          });
+          console.log("needUpdate", needUpdate);
+          needUpdate && newHook?.callback();
+        }
       });
     }
     run(fiber.child);
