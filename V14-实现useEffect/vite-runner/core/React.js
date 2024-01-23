@@ -65,33 +65,36 @@ function workLoop(deadline) {
 function commitRoot() {
   deletions.forEach(commitDeletion);
   commitWork(wipRoot.child);
-  commitEffectHook();
+  commitEffectHooks();
   currentRoot = wipRoot;
   wipRoot = null;
   deletions = [];
 }
 
-function commitEffectHook() {
+function commitEffectHooks() {
   function run(fiber) {
     if (!fiber) return;
 
     if (!fiber.alternate) {
       // init 初始化时
-      fiber.effectHook?.callback();
+      fiber.effectHooks?.forEach((hook) => {
+        hook.callback();
+      });
     } else {
       // update 更新时
       // deps 有没有发生改变
-      const oldEffectHook = fiber.alternate?.effectHook;
-      console.log("oldEffectHook", oldEffectHook);
+      fiber.effectHooks?.forEach((newHook, index) => {
+        const oldEffectHook = fiber.alternate?.effectHooks[index];
+        console.log("oldEffectHook", oldEffectHook);
 
-      // some
-      const needUpdate = oldEffectHook?.deps.some((oldDep, index) => {
-        return oldDep !== fiber.effectHook.deps[index];
+        // some
+        const needUpdate = oldEffectHook?.deps.some((oldDep, i) => {
+          return oldDep !== newHook.deps[i];
+        });
+        console.log("needUpdate", needUpdate);
+        needUpdate && newHook?.callback();
       });
-      console.log("needUpdate", needUpdate);
-      needUpdate && fiber.effectHook?.callback();
     }
-
     run(fiber.child);
     run(fiber.sibling);
   }
@@ -246,6 +249,9 @@ function reconcileChildren(fiber, children) {
 function updateFunctionComponent(fiber) {
   stateHooks = [];
   stateHookIndex = 0;
+
+  effectHooks = [];
+
   wipFiber = fiber;
 
   // 转换链表 设置好指针
@@ -360,13 +366,15 @@ function useState(initial) {
   return [stateHook.state, setState];
 }
 
+let effectHooks;
 function useEffect(callback, deps) {
   const effectHook = {
     callback,
     deps,
   };
+  effectHooks.push(effectHook);
 
-  wipFiber.effectHook = effectHook;
+  wipFiber.effectHooks = effectHooks;
 }
 
 const React = {
