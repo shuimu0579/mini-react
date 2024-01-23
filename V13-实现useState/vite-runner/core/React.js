@@ -313,7 +313,7 @@ function useState(initial) {
   currentFiber.stateHooks = stateHooks;
 
   function setState(action) {
-    // 提前检测传入的 state 值，减少不必要的更新
+    //提前检测传入的 state 值，减少不必要的更新
     const eagerState =
       typeof action === "function" ? action(stateHook.state) : action;
     if (eagerState === stateHook.state) return false;

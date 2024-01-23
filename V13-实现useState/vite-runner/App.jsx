@@ -12,6 +12,7 @@ function Foo() {
     // 从而再一次的调用 React.useState 函数, 获取到新的 count 值
     // setCount((c) => c + 1);
     // setBar((s) => s + "bar");
+
     setBar("bar");
   }
 
