@@ -78,7 +78,7 @@ function commitEffectHooks() {
     if (!fiber.alternate) {
       // init 初始化时
       fiber.effectHooks?.forEach((hook) => {
-        hook.callback();
+        hook.cleanup = hook.callback();
       });
     } else {
       // update 更新时
@@ -93,7 +93,7 @@ function commitEffectHooks() {
             return oldDep !== newHook.deps[i];
           });
           console.log("needUpdate", needUpdate);
-          needUpdate && newHook?.callback();
+          needUpdate && (newHook.cleanup = newHook?.callback());
         }
       });
     }
@@ -101,6 +101,20 @@ function commitEffectHooks() {
     run(fiber.sibling);
   }
 
+  function runCleanup(fiber) {
+    if (!fiber) return;
+    // 拿到旧的的fiber节点(通过alternate指针)上的effectHooks
+    fiber.alternate?.effectHooks?.forEach((hook) => {
+      if (hook.deps.length > 0) {
+        hook.cleanup && hook.cleanup();
+      }
+    });
+
+    runCleanup(fiber.child);
+    runCleanup(fiber.sibling);
+  }
+
+  runCleanup(wipRoot);
   run(wipRoot);
 }
 
@@ -373,6 +387,7 @@ function useEffect(callback, deps) {
   const effectHook = {
     callback,
     deps,
+    cleanup: undefined,
   };
   effectHooks.push(effectHook);
 

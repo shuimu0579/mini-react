@@ -3,6 +3,9 @@ import React from "./core/React.js";
 // useEffect
 // 调用时机是在 React 完成对 DOM 的渲染之后，并且浏览器完成绘制之前。
 
+// cleanup 在调用 useEffect 之前进行调用，
+// 当 deps 为空的时候不会调用返回的cleanup
+
 function Foo() {
   console.log("re foo");
   // 为什么这些 Hook 不能在if语句里面/也只能在函数内部的顶层添加，
@@ -22,10 +25,25 @@ function Foo() {
     console.log(
       "init  useEffect调用时机是在 React 完成对 DOM 的渲染之后，并且浏览器完成绘制之前"
     );
+    return () => {
+      console.log("cleanup 0");
+    };
   }, []);
 
   React.useEffect(() => {
     console.log("update", count);
+    // cleanup
+    return () => {
+      console.log("cleanup 1");
+    };
+  }, [count]);
+
+  React.useEffect(() => {
+    console.log("update", count);
+    // cleanup
+    return () => {
+      console.log("cleanup 2");
+    };
   }, [count]);
 
   return (
