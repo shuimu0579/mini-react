@@ -60,10 +60,13 @@ function commitRoot() {
 function commitWork(fiber) {
   if (!fiber) return;
 
+  // 如果当前 fiber 的父级是一个函数式组件，函数式组件是没有 真实 dom 的，
+  // 那么当前 fiber 的父级应该继续向上寻找，直到找到一个有真实 dom 的上级 fiber
   let fiberParent = fiber.parent;
   while (!fiberParent.dom) {
     fiberParent = fiberParent.parent;
   }
+
   if (fiber.dom) {
     fiberParent.dom.append(fiber.dom);
   }
@@ -108,6 +111,9 @@ function initChildren(fiber, children) {
 
 function updateFunctionComponent(fiber) {
   // 转换链表 设置好指针
+  // 对于函数式组件，fiber.type 实际上就是组件函数本身
+  // 例如，如果你有一个组件 function MyComponent(props) { ... }，那么 fiber.type 就是这个 MyComponent 函数。
+  // [fiber.type(fiber.props)] 等价于 [MyComponent(fiber.props)],也就是函数是组件返回的子节点形成的数组。
   const children = [fiber.type(fiber.props)];
   initChildren(fiber, children);
 }
@@ -132,7 +138,12 @@ function updateHostComponent(fiber) {
 // 一边建立树到链表的关系，一边生成真实的 dom,
 // 而不是先一次性将树生成为链表，再将链表生成真实的 dom
 function performWorkOfUnit(fiber) {
+  // 判断是否为函数式组件
+  // 对于函数式组件，fiber.type 实际上就是组件函数本身
+  // 例如，如果你有一个组件 function MyComponent(props) { ... }，那么 fiber.type 就是这个 MyComponent 函数。
+  // 此时，typeof fiber.type 的值肯定是 'function'，那么 typeof fiber.type === "function" 为 true
   const isFunctionComponent = typeof fiber.type === "function";
+
   // 不是函数式组件的时候，才需要创建真实 dom
   if (isFunctionComponent) {
     updateFunctionComponent(fiber);

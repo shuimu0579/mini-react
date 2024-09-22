@@ -21,6 +21,7 @@ function createElement(type, props, ...children) {
 }
 
 function render(el, container) {
+  // nextWorkOfUnit.props.children 就是App组件生成的VNode JS对象，组成的数组。
   nextWorkOfUnit = {
     dom: container,
     props: {

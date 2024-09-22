@@ -8,4 +8,6 @@ const App = React.createElement(
   "mini-react"
 );
 
+console.log("App", App);
+
 export default App;
